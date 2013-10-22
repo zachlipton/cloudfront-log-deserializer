@@ -12,13 +12,9 @@
  */
 package com.snowplowanalytics.hive.serde;
 
-// Java
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// Hive
 import org.apache.hadoop.hive.serde2.SerDeException;
 
 /**
