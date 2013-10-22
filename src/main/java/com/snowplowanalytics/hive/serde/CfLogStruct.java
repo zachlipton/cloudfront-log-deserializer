@@ -15,6 +15,8 @@ package com.snowplowanalytics.hive.serde;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.serde2.SerDeException;
 
 /**
@@ -27,6 +29,8 @@ import org.apache.hadoop.hive.serde2.SerDeException;
  * An immutable Scala case class would be nice but fear it would be s-l-o-w
  */
 public class CfLogStruct {
+	
+	private Log log = LogFactory.getLog(CfLogStruct.class);
 
 	// -------------------------------------------------------------------------------------------------------------------
 	// Mutable properties for this Hive struct
@@ -44,6 +48,12 @@ public class CfLogStruct {
 	public String referrer;
 	public String useragent;
 	public String querystring;
+	public String cookie;
+	public String resulttype;
+	public String requestid;
+	public String hostHeader;
+	public String protocol;
+	public String bytes;
 	// var querymap: Map[String, String] TODO add this
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -53,8 +63,9 @@ public class CfLogStruct {
 	// Define the regular expression for extracting the fields
 	// Adapted from Amazon's own cloudfront-loganalyzer.tgz
 	private static final String w = "[\\s]+"; // Whitespace regex
-	private static final Pattern cfRegex = Pattern.compile("([\\S]+)" // Date /
-																	  // date
+	/* new log format, see https://forums.aws.amazon.com/ann.jspa?annID=2174 */
+	private static final Pattern cfRegex =
+	Pattern.compile("([\\S]+)" // Date / date
 			+ w + "([\\S]+)" // Time / time
 			+ w + "([\\S]+)" // EdgeLocation / x-edge-location
 			+ w + "([\\S]+)" // BytesSent / sc-bytes
@@ -65,7 +76,30 @@ public class CfLogStruct {
 			+ w + "([\\S]+)" // HttpStatus / sc-status
 			+ w + "([\\S]+)" // Referrer / cs(Referer)
 			+ w + "([\\S]+)" // UserAgent / cs(User Agent)
-			+ w + "(.+)"); // Querystring / cs-uri-query
+			+ w + "([\\S]+)" // Querystring / cs(Querystring)
+			+ w + "([\\S]+)" // Cookie / cs(Cookie)
+			+ w + "([\\S]+)" // ResultType / x-edge-result-type
+			+ w + "([\\S]+)" // RequestId / x-edge-request-id
+			+ w + "([\\S]+)" // HostHeader / x-host-header
+			+ w + "([\\S]+)" // Protocol / cs-protocol
+			+ w + "(.+)");   // Bytes / cs-bytes
+
+	private static final Pattern cfRegex_before_2013_10_21 =
+	Pattern.compile("([\\S]+)" // Date / date
+			+ w + "([\\S]+)" // Time / time
+			+ w + "([\\S]+)" // EdgeLocation / x-edge-location
+			+ w + "([\\S]+)" // BytesSent / sc-bytes
+			+ w + "([\\S]+)" // IPAddress / c-ip
+			+ w + "([\\S]+)" // Operation / cs-method
+			+ w + "([\\S]+)" // Domain / cs(Host)
+			+ w + "([\\S]+)" // Object / cs-uri-stem
+			+ w + "([\\S]+)" // HttpStatus / sc-status
+			+ w + "([\\S]+)" // Referrer / cs(Referer)
+			+ w + "([\\S]+)" // UserAgent / cs(User Agent)
+			+ w + "([\\S]+)" // Querystring / cs(Querystring)
+			+ w + "([\\S]+)" // Cookie / cs(Cookie)
+			+ w + "([\\S]+)" // ResultType / x-edge-result-type
+			+ w + "(.+)");   // RequestId / x-edge-request-id
 
 	// -------------------------------------------------------------------------------------------------------------------
 	// Deserialization logic
@@ -89,26 +123,42 @@ public class CfLogStruct {
 			return null; // Empty row will be discarded by Hive
 		}
 
-		final Matcher m = cfRegex.matcher(row);
+		Matcher matcher = cfRegex.matcher(row);
 
 		try {
-			// Check our row is kosher
-			m.matches();
-			this.dt = m.group(1);
-			this.tm = m.group(2); // No need for toHiveDate any more -
+			// if the row is not matching the NEW log format, try the former one.
+			if (!matcher.find()) {
+				if (log.isDebugEnabled()) {
+					log.debug("old log format");
+				}
+				matcher = cfRegex_before_2013_10_21.matcher(row);
+				if (!matcher.find()) {
+					throw new Exception("row didn't match either old or new patterns");
+				}
+			}
+			this.dt = matcher.group(1);
+			this.tm = matcher.group(2); // No need for toHiveDate any more -
 								  // CloudFront date format matches Hive's
-			this.edgelocation = m.group(3);
-			this.bytessent = toInt(m.group(4));
-			this.ipaddress = m.group(5);
-			this.operation = m.group(6);
-			this.domain = m.group(7);
-			this.object = m.group(8);
-			this.httpstatus = toInt(m.group(9));
-			this.referrer = nullifyHyphen(m.group(10));
-			this.useragent = m.group(11);
-			this.querystring = nullifyHyphen(m.group(12));
+			this.edgelocation = matcher.group(3);
+			this.bytessent = toInt(matcher.group(4));
+			this.ipaddress = matcher.group(5);
+			this.operation = matcher.group(6);
+			this.domain = matcher.group(7);
+			this.object = matcher.group(8);
+			this.httpstatus = toInt(matcher.group(9));
+			this.referrer = nullifyHyphen(matcher.group(10));
+			this.useragent = matcher.group(11);
+			this.querystring = nullifyHyphen(matcher.group(12));
+			this.cookie = nullifyHyphen(matcher.group(13));
+			this.resulttype = matcher.group(14);
+			this.requestid = matcher.group(15);
+			if (matcher.groupCount()>15) {
+				this.hostHeader = matcher.group(16);
+				this.protocol = matcher.group(17);
+				this.bytes = matcher.group(18);
+			}
 		} catch (Exception e) {
-			throw new SerDeException("Could not parse row: " + row, e);
+			throw new SerDeException("Could not parse row: \n" + row, e);
 		}
 
 		return this; // Return the CfLogStruct
