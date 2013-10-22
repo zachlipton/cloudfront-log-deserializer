@@ -53,7 +53,7 @@ public class CfLogStruct {
 	public String requestid;
 	public String hostHeader;
 	public String protocol;
-	public String bytes;
+	public Integer bytes;
 	// var querymap: Map[String, String] TODO add this
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ public class CfLogStruct {
 			if (matcher.groupCount()>15) {
 				this.hostHeader = matcher.group(16);
 				this.protocol = matcher.group(17);
-				this.bytes = matcher.group(18);
+				this.bytes = toInt(matcher.group(18));
 			}
 		} catch (Exception e) {
 			throw new SerDeException("Could not parse row: \n" + row, e);
