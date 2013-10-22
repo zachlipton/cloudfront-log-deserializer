@@ -30,7 +30,7 @@ import org.apache.hadoop.hive.serde2.SerDeException;
  */
 public class CfLogStruct {
 	
-	private Log log = LogFactory.getLog(CfLogStruct.class);
+	private static final Log log = LogFactory.getLog(CfLogStruct.class);
 
 	// -------------------------------------------------------------------------------------------------------------------
 	// Mutable properties for this Hive struct
