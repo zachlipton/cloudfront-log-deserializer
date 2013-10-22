@@ -14,3 +14,7 @@ project/plugins/project/
 *.sublime-*
 *.swp
 *~
+.svn/
+.project
+.classpath
+.settings/
