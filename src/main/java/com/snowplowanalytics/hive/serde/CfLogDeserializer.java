@@ -12,20 +12,14 @@
  */
 package com.snowplowanalytics.hive.serde;
 
-// Java
 import java.nio.charset.CharacterCodingException;
 import java.util.List;
 import java.util.Properties;
 
-// Commons Logging
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-// Hadoop
 import org.apache.hadoop.conf.Configuration;
-
-// Hive
-import org.apache.hadoop.hive.serde2.Deserializer;
+import org.apache.hadoop.hive.serde2.AbstractDeserializer;
 import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.SerDeStats;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
@@ -36,12 +30,13 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
+
 /**
  * CfLogDeserializer reads CloudFront download distribution file access log data into Hive.
  * 
  * For documentation please see the introductory README.md in the project root.
  */
-public class CfLogDeserializer implements Deserializer {
+public class CfLogDeserializer extends AbstractDeserializer {
 
   // -------------------------------------------------------------------------------------------------------------------
   // Initial setup
@@ -66,9 +61,6 @@ public class CfLogDeserializer implements Deserializer {
   // Only test - TODO move this out into test suite
   // -------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @param args
-   */
   public static void runTest() {
     System.err.println("This is only a test run");
     try {
@@ -134,9 +126,6 @@ public class CfLogDeserializer implements Deserializer {
    * client needs to clone the returned value by calling
    * ObjectInspectorUtils.getStandardObject().
    * 
-   * @param blob The Writable object containing a serialized object
-   * @return A Java object representing the contents in the blob.
-   * @throws SerDeException For any exception during initialization
    */
   @Override
   public Object deserialize(Writable field) throws SerDeException {
