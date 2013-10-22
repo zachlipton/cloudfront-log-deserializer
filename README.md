@@ -4,7 +4,7 @@
 
 cloudfront-log-deserializer is a Deserializer to import Amazon Web Services' CloudFront access logs into [Apache Hive] [hive] ready for analysis.
 
-This Deserializer is used as a basis for the more specialized Deserializers used in [SnowPlow] [snowplow], a web-scale analytics platform built on Hadoop and Hive. 
+This Deserializer is used as a basis for the more specialized Deserializers used in [SnowPlow] [snowplow], a web-scale analytics platform built on Hadoop and Hive.
 
 cloudfront-log-deserializer is written in Java and is [available] [downloads] from GitHub as a downloadable jarfile. Currently it only supports CloudFront's [download distribution file format] [awslogdocs] (not the streaming file format).
 
@@ -17,12 +17,12 @@ The access log files for a download distribution contain the following fields ru
 | **Field**         | **Description**                                                                                                                                                                               |
 |------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `date `           | The date (UTC) on which the event occurred, e.g. 2009-03-10                                                                                                                                   |
-| `time`            | Time when the server finished processing the request (UTC), e.g. 01:42:39                                                                                                                     | 
+| `time`            | Time when the server finished processing the request (UTC), e.g. 01:42:39                                                                                                                     |
 | `x-edge-location` | The edge location that served the request, e.g. DFW3                                                                                                                                          |
 | `sc-bytes`        | Server to client bytes, e.g. 1045619                                                                                                                                                          |
 | `c-ip`            | Client IP, e.g. 192.0.2.183                                                                                                                                                                   |
 | `cs-method`       | HTTP access method, e.g. GET                                                                                                                                                                  |
-| `cs(Host)`        | DNS name (the CloudFront distribution name specified in the request). If you made the request to a CNAME, the DNS name field will contain the underlying distribution DNS name, not the CNAME | 
+| `cs(Host)`        | DNS name (the CloudFront distribution name specified in the request). If you made the request to a CNAME, the DNS name field will contain the underlying distribution DNS name, not the CNAME |
 | `cs-uri-stem`     | URI stem, e.g. /images/daily-ad.jpg                                                                                                                                                           |
 | `sc-status`       | HTTP status code, e.g. 200                                                                                                                                                                    |
 | `cs(Referer)`     | The referrer, or a single dash (-) if there is no referrer                                                                                                                                    |
@@ -47,7 +47,7 @@ Here is the Hive table definition in full:
       domain STRING,
       object STRING,
       httpstatus STRING,
-      referrer STRING, 
+      referrer STRING,
       useragent STRING,
       querystring STRING
     )
@@ -61,10 +61,10 @@ Then upload the jarfile into an S3 bucket accessible from your Hive console.
 
 Now using this Deserializer with Hive should be quite easy:
 
-    ADD JAR s3://{{JARS-BUCKET-NAME}}/cloudfront-log-deserializer-0.2.jar;
+    ADD JAR s3://{{JARS-BUCKET-NAME}}/cloudfront-log-deserializer-1.0.jar;
 
-    CREATE EXTERNAL TABLE accesses 
-    ROW FORMAT 
+    CREATE EXTERNAL TABLE accesses
+    ROW FORMAT
       SERDE 'com.snowplowanalytics.hive.serde.CfLogDeserializer'
     LOCATION 's3://{{LOGS-BUCKET-NAME}}/';
 
@@ -77,9 +77,9 @@ Once you have created this table, you should be able to perform the following si
 
 Checking the number of accesses per day:
 
-    SELECT 
+    SELECT
       `dt`,
-      COUNT(DISTINCT `tm`) 
+      COUNT(DISTINCT `tm`)
     FROM `accesses`
     GROUP BY `dt`
 
@@ -96,7 +96,7 @@ Looking at the number of logs per referrer by day:
 
 If you find this Deserializer helpful, you might also want to take a look at:
 
-* Amazon's own [CloudFront log analyzer] [loganalyzer] for Hadoop 
+* Amazon's own [CloudFront log analyzer] [loganalyzer] for Hadoop
 * The [S3LogDeserializer] [s3logdeserializer] which comes bundled with Hive
 
 ## Copyright and license
@@ -112,11 +112,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-[hive]: http://hive.apache.org/ 
+[hive]: http://hive.apache.org/
 [snowplow]: https://github.com/snowplow/snowplow
 [awslogdocs]: http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html#LogFileFormat
 [license]: http://www.apache.org/licenses/LICENSE-2.0
 [loganalyzer]: http://elasticmapreduce.s3.amazonaws.com/samples/cloudfront/code/cloudfront-loganalyzer.tgz
-[w3cformat]: http://www.w3.org/TR/WD-logfile.html 
+[w3cformat]: http://www.w3.org/TR/WD-logfile.html
 [s3logdeserializer]: http://javasourcecode.org/html/open-source/hive/hive-0.7.1/org/apache/hadoop/hive/contrib/serde2/s3/S3LogDeserializer.html
 [downloads]: https://github.com/snowplow/cloudfront-log-deserializer/downloads
