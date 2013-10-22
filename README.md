@@ -72,11 +72,12 @@ First, build the jar :
 	mvn package
 
 Then upload the jarfile into an S3 bucket accessible from your Hive console.
+
 	$ s4cmd target/cloudfront-log-deserializer-1.0.jar s3://{{JARS-BUCKET-NAME}}/
 
 Now using this Deserializer with Hive should be quite easy:
 
-    ADD JAR s3://{{JARS-BUCKET-NAME}}/cloudfront-log-deserializer-1.0.jar;
+    ADD JAR s3://{{JARS-BUCKET-NAME}}/cloudfront-log-deserializer-1.1.0.jar;
 
     CREATE EXTERNAL TABLE accesses
     ROW FORMAT
