@@ -51,7 +51,7 @@ public class CfLogStruct {
 	public String cookie;
 	public String resulttype;
 	public String requestid;
-	public String hostHeader;
+	public String hostheader;
 	public String protocol;
 	public Integer bytes;
 	// var querymap: Map[String, String] TODO add this
@@ -153,7 +153,7 @@ public class CfLogStruct {
 			this.resulttype = matcher.group(14);
 			this.requestid = matcher.group(15);
 			if (matcher.groupCount()>15) {
-				this.hostHeader = matcher.group(16);
+				this.hostheader = matcher.group(16);
 				this.protocol = matcher.group(17);
 				this.bytes = toInt(matcher.group(18));
 			}
