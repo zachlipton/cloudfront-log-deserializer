@@ -6,7 +6,7 @@ cloudfront-log-deserializer is a Deserializer to import Amazon Web Services' Clo
 
 This Deserializer is used as a basis for the more specialized Deserializers used in [SnowPlow] [snowplow], a web-scale analytics platform built on Hadoop and Hive.
 
-cloudfront-log-deserializer is written in Java and is [available] [downloads] from GitHub as a downloadable jarfile. Currently it only supports CloudFront's [download distribution file format] [awslogdocs] (not the streaming file format).
+cloudfront-log-deserializer is written in Java and is [available] [downloads] from GitHub as a downloadable jarfile. Currently it only supports CloudFront's [basic distribution file format] [awslogdocs] (not the streaming file format), in its latest version on October, 22nd 2013.
 
 ## The CloudFront access log format
 
@@ -73,7 +73,7 @@ First, build the jar :
 
 Then upload the jarfile into an S3 bucket accessible from your Hive console.
 
-	$ s4cmd target/cloudfront-log-deserializer-1.0.jar s3://{{JARS-BUCKET-NAME}}/
+	$ s4cmd cp -f target/cloudfront-log-deserializer-1.1.0.jar s3://{{JARS-BUCKET-NAME}}/
 
 Now using this Deserializer with Hive should be quite easy:
 
@@ -130,9 +130,9 @@ limitations under the License.
 
 [hive]: http://hive.apache.org/
 [snowplow]: https://github.com/snowplow/snowplow
-[awslogdocs]: http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html#LogFileFormat
+[awslogdocs]: http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html#BasicDistributionFileFormat
 [license]: http://www.apache.org/licenses/LICENSE-2.0
 [loganalyzer]: http://elasticmapreduce.s3.amazonaws.com/samples/cloudfront/code/cloudfront-loganalyzer.tgz
 [w3cformat]: http://www.w3.org/TR/WD-logfile.html
 [s3logdeserializer]: http://javasourcecode.org/html/open-source/hive/hive-0.7.1/org/apache/hadoop/hive/contrib/serde2/s3/S3LogDeserializer.html
-[downloads]: https://github.com/snowplow/cloudfront-log-deserializer/downloads
+[downloads]: https://github.com/Samuel29/cloudfront-log-deserializer/releases
