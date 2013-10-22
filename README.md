@@ -55,9 +55,12 @@ Here is the Hive table definition in full:
 
 ## Usage
 
-First, download the latest jarfile for cloudfront-log-deserializer from GitHub from the [Downloads] [downloads] menu.
+First, build the jar :
+
+	mvn package
 
 Then upload the jarfile into an S3 bucket accessible from your Hive console.
+	$ s4cmd target/cloudfront-log-deserializer-1.0.jar s3://{{JARS-BUCKET-NAME}}/
 
 Now using this Deserializer with Hive should be quite easy:
 
