@@ -54,6 +54,7 @@ public class CfLogStruct {
 	public String hostheader;
 	public String protocol;
 	public Integer bytes;
+	public Double timetaken;
 	// var querymap: Map[String, String] TODO add this
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -82,8 +83,29 @@ public class CfLogStruct {
 			+ w + "([\\S]+)" // RequestId / x-edge-request-id
 			+ w + "([\\S]+)" // HostHeader / x-host-header
 			+ w + "([\\S]+)" // Protocol / cs-protocol
-			+ w + "(.+)");   // Bytes / cs-bytes
+			+ w + "(.+)"		 // Bytes / cs-bytes
+			+ w + "(.+)");   // TimeTaken / cs-time-taken
 
+	private static final Pattern cfRegex_before_timetaken =
+	Pattern.compile("([\\S]+)" // Date / date
+			+ w + "([\\S]+)" // Time / time
+			+ w + "([\\S]+)" // EdgeLocation / x-edge-location
+			+ w + "([\\S]+)" // BytesSent / sc-bytes
+			+ w + "([\\S]+)" // IPAddress / c-ip
+			+ w + "([\\S]+)" // Operation / cs-method
+			+ w + "([\\S]+)" // Domain / cs(Host)
+			+ w + "([\\S]+)" // Object / cs-uri-stem
+			+ w + "([\\S]+)" // HttpStatus / sc-status
+			+ w + "([\\S]+)" // Referrer / cs(Referer)
+			+ w + "([\\S]+)" // UserAgent / cs(User Agent)
+			+ w + "([\\S]+)" // Querystring / cs(Querystring)
+			+ w + "([\\S]+)" // Cookie / cs(Cookie)
+			+ w + "([\\S]+)" // ResultType / x-edge-result-type
+			+ w + "([\\S]+)" // RequestId / x-edge-request-id
+			+ w + "([\\S]+)" // HostHeader / x-host-header
+			+ w + "([\\S]+)" // Protocol / cs-protocol
+			+ w + "(.+)");		 // Bytes / cs-bytes
+	
 	private static final Pattern cfRegex_before_2013_10_21 =
 	Pattern.compile("([\\S]+)" // Date / date
 			+ w + "([\\S]+)" // Time / time
@@ -133,8 +155,11 @@ public class CfLogStruct {
 				}
 				matcher = cfRegex_before_2013_10_21.matcher(row);
 				if (!matcher.find()) {
-					throw new Exception("row didn't match either old or new patterns");
-				}
+					matcher = cfRegex_before_timetaken;
+					if (!matcher.find()) {
+						throw new Exception("row didn't match either old or new patterns");
+					}
+				}	
 			}
 			this.dt = matcher.group(1);
 			this.tm = matcher.group(2); // No need for toHiveDate any more -
@@ -156,6 +181,9 @@ public class CfLogStruct {
 				this.hostheader = matcher.group(16);
 				this.protocol = matcher.group(17);
 				this.bytes = toInt(matcher.group(18));
+				if (matcher.groupCount()>18) {
+					this.timetaken = toDouble(matcher.group(19));
+				}
 			}
 		} catch (Exception e) {
 			throw new SerDeException("Could not parse row: \n" + row, e);
