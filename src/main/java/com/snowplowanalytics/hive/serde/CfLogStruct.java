@@ -182,7 +182,7 @@ public class CfLogStruct {
 				this.protocol = matcher.group(17);
 				this.bytes = toInt(matcher.group(18));
 				if (matcher.groupCount()>18) {
-					this.timetaken = toDouble(matcher.group(19));
+					this.timetaken = Double.parseDouble(matcher.group(19));
 				}
 			}
 		} catch (Exception e) {
