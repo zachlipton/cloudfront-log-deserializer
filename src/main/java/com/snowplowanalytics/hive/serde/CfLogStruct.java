@@ -155,7 +155,7 @@ public class CfLogStruct {
 				}
 				matcher = cfRegex_before_2013_10_21.matcher(row);
 				if (!matcher.find()) {
-					matcher = cfRegex_before_timetaken;
+					matcher = cfRegex_before_timetaken.matcher(row);
 					if (!matcher.find()) {
 						throw new Exception("row didn't match either old or new patterns");
 					}
